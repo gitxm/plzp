@@ -511,15 +511,20 @@ class SimpleProcessor:
             input_path = Path(original_file_path)
             if output_folder:
                 output_folder_path = Path(output_folder)
-                output_folder_path.mkdir(parents=True, exist_ok=True)
-                output_file_path = output_folder_path / f"{input_path.stem}_filtered.xlsx"
-                base_folder = output_folder_path / f"{input_path.stem}_filtered"
             else:
-                output_file_path = input_path.parent / f"{input_path.stem}_filtered.xlsx"
-                base_folder = input_path.parent / f"{input_path.stem}_filtered"
+                # 默认使用配置文件中指定的输出文件夹
+                from app.config import DEFAULT_OUTPUT_FOLDER
+                output_folder_path = Path(DEFAULT_OUTPUT_FOLDER)
+
+            # 创建输出文件夹
+            output_folder_path.mkdir(parents=True, exist_ok=True)
+
+            # 设置输出文件路径和基础文件夹
+            output_file_path = output_folder_path / f"{input_path.stem}_filtered.xlsx"
+            base_folder = output_folder_path / f"{input_path.stem}_filtered"
 
             # 创建基础文件夹
-            base_folder.mkdir(exist_ok=True)
+            base_folder.mkdir(parents=True, exist_ok=True)
 
             # 下载图片
             success_count = self.processor.download_images_for_dataframe(filtered_df, base_folder)
@@ -718,6 +723,10 @@ class SimpleProcessor:
         if status['enabled']:
             print(f"🔧 线程数: {status['max_threads']}")
 
+        # 显示输出位置
+        output_location = self.settings['output_folder'] if self.settings['output_folder'] else 'output'
+        print(f"📁 输出位置: {output_location}")
+
         # 根据筛选方式选择处理方法
         if filtered_data:
             # 使用智能筛选的数据
@@ -772,7 +781,8 @@ class SimpleProcessor:
             # 如果用户选择了筛选条件，account_filter 现在包含筛选列表或 None（全量处理）
 
         print(f"\n🔄 开始批量处理文件夹: {folder_path}")
-        print(f"📁 输出文件夹: {self.settings['output_folder']}")
+        output_location = self.settings['output_folder'] if self.settings['output_folder'] else 'output'
+        print(f"📁 输出位置: {output_location}")
         print(f"🔍 递归搜索: {'启用' if self.settings['recursive'] else '禁用'}")
         if account_filter:
             print(f"🔍 账户筛选: {', '.join(account_filter)}")

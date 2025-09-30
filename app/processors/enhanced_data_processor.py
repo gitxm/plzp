@@ -394,11 +394,15 @@ class EnhancedDataProcessor:
                 #  
                 base_folder = output_folder_path
             else:
-                output_file_path = input_path.parent / f"{input_path.stem}_updated.xlsx"
-                base_folder = input_path.parent / input_path.stem
+                # 默认使用配置文件中指定的输出文件夹
+                from app.config import DEFAULT_OUTPUT_FOLDER
+                output_folder_path = Path(DEFAULT_OUTPUT_FOLDER)
+                output_folder_path.mkdir(parents=True, exist_ok=True)
+                output_file_path = output_folder_path / f"{input_path.stem}_updated.xlsx"
+                base_folder = output_folder_path
 
             # 创建基础文件夹
-            base_folder.mkdir(exist_ok=True)
+            base_folder.mkdir(parents=True, exist_ok=True)
 
             # 下载图片
             success_count = self.download_images_for_dataframe(processed_df, base_folder)

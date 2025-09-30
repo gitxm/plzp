@@ -8,6 +8,9 @@
 INPUT_EXCEL_FILE = "数据样例.xlsx"
 OUTPUT_EXCEL_FILE = "数据样例_updated.xlsx"
 
+# 默认输出文件夹（当未指定输出路径时使用）
+DEFAULT_OUTPUT_FOLDER = "output"
+
 # 支持的文件格式
 SUPPORTED_FORMATS = {
     '.xlsx': 'excel',
