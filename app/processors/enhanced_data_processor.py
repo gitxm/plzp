@@ -404,23 +404,38 @@ class EnhancedDataProcessor:
             # 创建基础文件夹
             base_folder.mkdir(parents=True, exist_ok=True)
 
+            # 显示开始下载的提示（绝对路径）
+            output_abs_path = output_folder_path.resolve()
+            base_folder_abs_path = base_folder.resolve()
+            logger.info(f"📁 输出目录: {output_abs_path}")
+            logger.info(f"💾 图片将保存在: {base_folder_abs_path}")
+            logger.info(f"🚀 开始下载 {len(processed_df)} 张图片...")
+
             # 下载图片
             success_count = self.download_images_for_dataframe(processed_df, base_folder)
 
             # 保存更新后的文件
             processed_df.to_excel(output_file_path, index=False)
 
-            logger.info(f"文件处理完成: {input_file_path}")
-            logger.info(f"输出文件: {output_file_path}")
-            logger.info(f"图片下载成功: {success_count}/{len(processed_df)}")
+            # 显示完成信息（使用绝对路径）
+            output_file_abs_path = output_file_path.resolve()
+
+            logger.info("=" * 60)
+            logger.info("✅ 文件处理完成！")
+            logger.info("=" * 60)
+            logger.info(f"📁 输出目录: {output_abs_path}")
+            logger.info(f"📄 数据文件: {output_file_abs_path}")
+            logger.info(f"🖼️  图片目录: {base_folder_abs_path}")
+            logger.info(f"📊 成功下载: {success_count}/{len(processed_df)} 张图片")
 
             # 显示错误日志摘要
             error_summary = self.get_error_log_summary()
             if error_summary['error_count'] > 0:
-                logger.info(f"下载错误数量: {error_summary['error_count']}")
-                logger.info(f"错误日志文件: {error_summary['error_log_file']}")
+                logger.info(f"❌ 下载错误: {error_summary['error_count']} 个")
+                logger.info(f"📋 错误日志: {error_summary['error_log_file']}")
             else:
-                logger.info("所有图片下载成功，无错误记录")
+                logger.info("✅ 所有图片下载成功，无错误记录")
+            logger.info("=" * 60)
 
             # 写入错误汇总日志并提示详细日志位置
             self._write_error_summary()
@@ -987,6 +1002,16 @@ class EnhancedDataProcessor:
         logger.info("开始批量处理文件")
         logger.info("=" * 60)
 
+        # 显示输出目录（绝对路径）
+        if output_folder:
+            output_path = Path(output_folder).resolve()
+        else:
+            from app.config import DEFAULT_OUTPUT_FOLDER
+            output_path = Path(DEFAULT_OUTPUT_FOLDER).resolve()
+
+        logger.info(f"📁 输出目录: {output_path}")
+        logger.info(f"💾 所有文件将保存在: {output_path}")
+
         # 查找文件
         file_paths = self.find_data_files(input_folder, recursive)
 
@@ -999,7 +1024,7 @@ class EnhancedDataProcessor:
         success_count = 0
         failed_count = 0
 
-        logger.info(f"找到 {total_files} 个文件，开始处理...")
+        logger.info(f"🚀 找到 {total_files} 个文件，开始处理...")
 
         for i, file_path in enumerate(file_paths, 1):
             logger.info(f"处理文件 {i}/{total_files}: {file_path}")
@@ -1011,10 +1036,14 @@ class EnhancedDataProcessor:
 
         # 输出统计结果
         logger.info("=" * 60)
-        logger.info("批量处理完成")
-        logger.info(f"总文件数: {total_files}")
-        logger.info(f"成功处理: {success_count}")
-        logger.info(f"处理失败: {failed_count}")
+        logger.info("✅ 批量处理完成！")
+        logger.info("=" * 60)
+        logger.info(f"📊 处理统计:")
+        logger.info(f"  总文件数: {total_files}")
+        logger.info(f"  成功处理: {success_count}")
+        logger.info(f"  处理失败: {failed_count}")
+        logger.info(f"\n📁 文件保存位置: {output_path}")
+        logger.info(f"🖼️  图片目录结构: {output_path}/company_id/account_id/user_id/")
         logger.info("=" * 60)
 
         # 写入一次汇总日志，并提示位置

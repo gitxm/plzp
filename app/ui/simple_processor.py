@@ -532,18 +532,27 @@ class SimpleProcessor:
             # 保存筛选后的文件
             filtered_df.to_excel(output_file_path, index=False)
 
-            print(f"\n✅ 智能筛选处理完成:")
-            print(f"📄 输出文件: {output_file_path}")
-            print(f"📁 图片文件夹: {base_folder}")
-            print(f"🖼️ 图片下载成功: {success_count}/{len(filtered_df)}")
+            # 显示完成信息（使用绝对路径）
+            output_abs_path = output_folder_path.resolve()
+            output_file_abs_path = output_file_path.resolve()
+            base_folder_abs_path = base_folder.resolve()
+
+            print("\n" + "=" * 60)
+            print("✅ 智能筛选处理完成！")
+            print("=" * 60)
+            print(f"📁 输出目录: {output_abs_path}")
+            print(f"📄 数据文件: {output_file_abs_path}")
+            print(f"🖼️  图片目录: {base_folder_abs_path}")
+            print(f"📊 成功下载: {success_count}/{len(filtered_df)} 张图片")
 
             # 显示错误日志摘要
             error_summary = self.processor.get_error_log_summary()
             if error_summary['error_count'] > 0:
-                print(f"❌ 下载错误数量: {error_summary['error_count']}")
-                print(f"📋 错误日志文件: {error_summary['error_log_file']}")
+                print(f"❌ 下载错误: {error_summary['error_count']} 个")
+                print(f"📋 错误日志: {error_summary['error_log_file']}")
             else:
                 print("✅ 所有图片下载成功，无错误记录")
+            print("=" * 60)
 
             return True
 
@@ -723,9 +732,13 @@ class SimpleProcessor:
         if status['enabled']:
             print(f"🔧 线程数: {status['max_threads']}")
 
-        # 显示输出位置
+        # 显示输出位置（绝对路径）
+        from pathlib import Path
         output_location = self.settings['output_folder'] if self.settings['output_folder'] else 'output'
-        print(f"📁 输出位置: {output_location}")
+        output_abs_path = Path(output_location).resolve()
+        print(f"\n📁 输出目录: {output_abs_path}")
+        print(f"💾 图片将保存在: {output_abs_path}/company_id/account_id/user_id/")
+        print(f"🚀 开始下载图片...\n")
 
         # 根据筛选方式选择处理方法
         if filtered_data:
@@ -744,7 +757,20 @@ class SimpleProcessor:
             )
 
         if success:
+            print("\n" + "=" * 60)
             print("✅ 文件处理完成！")
+            print("=" * 60)
+            print(f"📁 文件保存位置: {output_abs_path}")
+
+            # 显示输出文件路径
+            input_path = Path(file_path)
+            if filtered_data:
+                output_file = output_abs_path / f"{input_path.stem}_filtered.xlsx"
+            else:
+                output_file = output_abs_path / f"{input_path.stem}_updated.xlsx"
+            print(f"📄 数据文件: {output_file}")
+            print(f"🖼️  图片目录: {output_abs_path}/company_id/account_id/user_id/")
+            print("=" * 60)
         else:
             print("❌ 文件处理失败，请查看日志文件")
 
@@ -781,8 +807,12 @@ class SimpleProcessor:
             # 如果用户选择了筛选条件，account_filter 现在包含筛选列表或 None（全量处理）
 
         print(f"\n🔄 开始批量处理文件夹: {folder_path}")
+
+        # 显示输出位置（绝对路径）
+        from pathlib import Path
         output_location = self.settings['output_folder'] if self.settings['output_folder'] else 'output'
-        print(f"📁 输出位置: {output_location}")
+        output_abs_path = Path(output_location).resolve()
+
         print(f"🔍 递归搜索: {'启用' if self.settings['recursive'] else '禁用'}")
         if account_filter:
             print(f"🔍 账户筛选: {', '.join(account_filter)}")
@@ -799,6 +829,10 @@ class SimpleProcessor:
         if status['enabled']:
             print(f"🔧 线程数: {status['max_threads']}")
 
+        print(f"\n📁 输出目录: {output_abs_path}")
+        print(f"💾 所有文件将保存在: {output_abs_path}")
+        print(f"🚀 开始批量下载图片...\n")
+
         results = self.processor.process_batch_files(
             folder_path,
             self.settings['output_folder'],
@@ -806,10 +840,16 @@ class SimpleProcessor:
             account_filter=account_filter
         )
 
-        print(f"\n📊 批量处理完成！")
+        print("\n" + "=" * 60)
+        print("✅ 批量处理完成！")
+        print("=" * 60)
+        print(f"📊 处理统计:")
         print(f"  总文件数: {results['total']}")
         print(f"  成功处理: {results['success']}")
         print(f"  处理失败: {results['failed']}")
+        print(f"\n📁 文件保存位置: {output_abs_path}")
+        print(f"🖼️  图片目录结构: {output_abs_path}/company_id/account_id/user_id/")
+        print("=" * 60)
 
     def handle_view_folder(self):
         """查看文件夹内容"""
